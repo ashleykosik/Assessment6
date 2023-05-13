@@ -2,6 +2,15 @@ const express = require("express");
 const bots = require("./src/botsData");
 const shuffle = require("./src/shuffle");
 
+var Rollbar = require("rollbar");
+var rollbar = new Rollbar({
+  accessToken: '5b0b847aa66a4625a65fc04c3f067db3',
+  captureUncaught: true,
+  captureUnhandledRejections: true
+});
+
+//rollbar.log('Hello Ashley!')
+
 const playerRecord = {
   wins: 0,
   losses: 0,
@@ -40,6 +49,7 @@ app.get("/api/robots", (req, res) => {
   try {
     res.status(200).send(bots);
   } catch (error) {
+    rollbar.warning("failing to display all robots")
     console.error("ERROR GETTING BOTS", error);
     res.sendStatus(400);
   }
@@ -50,6 +60,7 @@ app.get("/api/robots/shuffled", (req, res) => {
     let shuffled = shuffle(bots);
     res.status(200).send(shuffled);
   } catch (error) {
+    rollbar.error("failed to shuffle robots available for duel")
     console.error("ERROR GETTING SHUFFLED BOTS", error);
     res.sendStatus(400);
   }
@@ -73,6 +84,7 @@ app.post("/api/duel", (req, res) => {
       res.status(200).send("You won!");
     }
   } catch (error) {
+    rollbar.critical("failed to update duel status")
     console.log("ERROR DUELING", error);
     res.sendStatus(400);
   }
@@ -82,6 +94,7 @@ app.get("/api/player", (req, res) => {
   try {
     res.status(200).send(playerRecord);
   } catch (error) {
+    rollbar.info("wins and losses score is not displaying")
     console.log("ERROR GETTING PLAYER STATS", error);
     res.sendStatus(400);
   }
